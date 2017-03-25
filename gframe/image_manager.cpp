@@ -54,6 +54,98 @@ void ImageManager::RemoveTexture(int code) {
 		tMap.erase(tit);
 	}
 }
+//https://github.com/minetest/minetest/issues/2419
+#define rangelim(d, min, max) ((d) < (min) ? (min) : ((d)>(max)?(max):(d)))
+#define SWAP(t, x, y) do { \
+	t temp = x;            \
+	x = y;                 \
+	y = temp;              \
+} while (0)
+void imageScaleNNAA(video::IImage *src, const core::rect<s32> &srcrect, video::IImage *dest)
+{
+	double sx, sy, minsx, maxsx, minsy, maxsy, area, ra, ga, ba, aa, pw, ph, pa;
+	u32 dy, dx;
+	video::SColor pxl;
+
+	// Cache rectsngle boundaries.
+	double sox = srcrect.UpperLeftCorner.X * 1.0;
+	double soy = srcrect.UpperLeftCorner.Y * 1.0;
+	double sw = srcrect.getWidth() * 1.0;
+	double sh = srcrect.getHeight() * 1.0;
+
+	// Walk each destination image pixel.
+	// Note: loop y around x for better cache locality.
+	core::dimension2d<u32> dim = dest->getDimension();
+	for (dy = 0; dy < dim.Height; dy++)
+		for (dx = 0; dx < dim.Width; dx++) {
+
+			// Calculate floating-point source rectangle bounds.
+			// Do some basic clipping, and for mirrored/flipped rects,
+			// make sure min/max are in the right order.
+			minsx = sox + (dx * sw / dim.Width);
+			minsx = rangelim(minsx, 0, sw);
+			maxsx = minsx + sw / dim.Width;
+			maxsx = rangelim(maxsx, 0, sw);
+			if (minsx > maxsx)
+				SWAP(double, minsx, maxsx);
+			minsy = soy + (dy * sh / dim.Height);
+			minsy = rangelim(minsy, 0, sh);
+			maxsy = minsy + sh / dim.Height;
+			maxsy = rangelim(maxsy, 0, sh);
+			if (minsy > maxsy)
+				SWAP(double, minsy, maxsy);
+
+			// Total area, and integral of r, g, b values over that area,
+			// initialized to zero, to be summed up in next loops.
+			area = 0;
+			ra = 0;
+			ga = 0;
+			ba = 0;
+			aa = 0;
+
+			// Loop over the integral pixel positions described by those bounds.
+			for (sy = floor(minsy); sy < maxsy; sy++)
+				for (sx = floor(minsx); sx < maxsx; sx++) {
+
+					// Calculate width, height, then area of dest pixel
+					// that's covered by this source pixel.
+					pw = 1;
+					if (minsx > sx)
+						pw += sx - minsx;
+					if (maxsx < (sx + 1))
+						pw += maxsx - sx - 1;
+					ph = 1;
+					if (minsy > sy)
+						ph += sy - minsy;
+					if (maxsy < (sy + 1))
+						ph += maxsy - sy - 1;
+					pa = pw * ph;
+
+					// Get source pixel and add it to totals, weighted
+					// by covered area and alpha.
+					pxl = src->getPixel((u32)sx, (u32)sy);
+					area += pa;
+					ra += pa * pxl.getRed();
+					ga += pa * pxl.getGreen();
+					ba += pa * pxl.getBlue();
+					aa += pa * pxl.getAlpha();
+				}
+
+			// Set the destination image pixel to the average color.
+			if (area > 0) {
+				pxl.setRed(ra / area + 0.5);
+				pxl.setGreen(ga / area + 0.5);
+				pxl.setBlue(ba / area + 0.5);
+				pxl.setAlpha(aa / area + 0.5);
+			} else {
+				pxl.setRed(0);
+				pxl.setGreen(0);
+				pxl.setBlue(0);
+				pxl.setAlpha(0);
+			}
+			dest->setPixel(dx, dy, pxl);
+		}
+}
 irr::video::ITexture* ImageManager::GetTexture(int code) {
 	if(code == 0)
 		return tUnknown;
@@ -70,8 +162,15 @@ irr::video::ITexture* ImageManager::GetTexture(int code) {
 			tMap[code] = NULL;
 			return GetTextureThumb(code);
 		} else {
-			tMap[code] = img;
-			return img;
+			video::IImage* srcimg = driver->createImageFromData(img->getColorFormat(),
+				img->getSize(), img->lock(), false);
+			img->unlock();
+			video::IImage *destimg = driver->createImage(img->getColorFormat(),
+				core::dimension2d<u32>(177,254));
+			imageScaleNNAA(srcimg, core::rect<s32>(0, 0, img->getSize().Width, img->getSize().Height), destimg);
+			video::ITexture *scaled = driver->addTexture("233", destimg, NULL);
+			tMap[code] = scaled;
+			return scaled;
 		}
 	}
 	if(tit->second)
@@ -85,17 +184,25 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 	auto tit = tThumb.find(code);
 	if(tit == tThumb.end()) {
 		char file[256];
-		sprintf(file, "expansions/pics/thumbnail/%d.jpg", code);
+		sprintf(file, "expansions/pics/%d.jpg", code);
 		irr::video::ITexture* img = driver->getTexture(file);
 		if(img == NULL) {
-			sprintf(file, "pics/thumbnail/%d.jpg", code);
+			sprintf(file, "pics/%d.jpg", code);
 			img = driver->getTexture(file);
 		}
 		if(img == NULL) {
 			tThumb[code] = NULL;
 			return tUnknown;
 		} else {
-			tThumb[code] = img;
+			video::IImage* srcimg = driver->createImageFromData(img->getColorFormat(),
+				img->getSize(), img->lock(), false);
+			img->unlock();
+			video::IImage *destimg = driver->createImage(img->getColorFormat(),
+				core::dimension2d<u32>(44, 64));
+			imageScaleNNAA(srcimg, core::rect<s32>(0, 0, img->getSize().Width, img->getSize().Height), destimg);
+			video::ITexture *scaled = driver->addTexture("233", destimg, NULL);
+			tThumb[code] = scaled;
+			return scaled;
 			return img;
 		}
 	}
