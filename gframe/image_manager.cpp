@@ -27,12 +27,16 @@ bool ImageManager::Initial() {
 	tHand[1] = driver->getTexture("textures/f2.jpg");
 	tHand[2] = driver->getTexture("textures/f3.jpg");
 	tBackGround = driver->getTexture("textures/bg.jpg");
-	tBackGround_menu = driver->getTexture("textures/bg_menu.jpg");
-	if(!tBackGround_menu)
-		tBackGround_menu = tBackGround;
-	tBackGround_deck = driver->getTexture("textures/bg_deck.jpg");
-	if(!tBackGround_deck)
-		tBackGround_deck = tBackGround;
+	tBackGround_menu = tBackGround;
+	//tBackGround_menu = driver->getTexture("textures/bg_menu.jpg");
+	//if(!tBackGround_menu)
+	//	tBackGround_menu = tBackGround;
+	tBackGround_deck = driver->getTexture("textures/bg2.jpg");
+	if (!tBackGround_deck) {
+		tBackGround_deck = driver->getTexture("textures/bg_deck.jpg");
+		if(!tBackGround_deck)
+			tBackGround_deck = tBackGround;
+	}
 	tField[0] = driver->getTexture("textures/field2.png");
 	tFieldTransparent[0] = driver->getTexture("textures/field-transparent2.png");
 	tField[1] = driver->getTexture("textures/field3.png");
