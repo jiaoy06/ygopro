@@ -1743,6 +1743,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 								if(!(mcard->type & TYPE_LINK)) {
 									wchar_t* form = L"\u2605";
 									if (mcard->rank) form = L"\u2606";
+									if (mcard->type & TYPE_DARKSYNCHRO) form = L"\u235f";
 									myswprintf(formatBuffer, L"\n%ls%d", form, (mcard->level ? mcard->level : mcard->rank));
 									str.append(formatBuffer);
 								} else {

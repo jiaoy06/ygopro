@@ -1342,6 +1342,7 @@ void Game::ShowCardInfo(int code) {
 		if(!(cd.type & TYPE_LINK)) {
 			wchar_t* form = L"\u2605";
 			if(cd.type & TYPE_XYZ) form = L"\u2606";
+			if(cd.type & TYPE_DARKSYNCHRO) form = L"\u235f";
 			myswprintf(formatBuffer, L"[%ls%d] ", form, cd.level);
 			wchar_t adBuffer[16];
 			if(cd.attack < 0 && cd.defense < 0)

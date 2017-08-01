@@ -38,6 +38,7 @@ bool DataManager::LoadDB(const char* file) {
 				cd.link_marker = 0;
 			unsigned int level = sqlite3_column_int(pStmt, 7);
 			cd.level = level & 0xff;
+			if (cd.type & TYPE_DARKSYNCHRO) cd.level = -(0xff - level & 0xff) - 0x1;
 			cd.lscale = (level >> 24) & 0xff;
 			cd.rscale = (level >> 16) & 0xff;
 			cd.race = sqlite3_column_int(pStmt, 8);
@@ -261,7 +262,7 @@ const wchar_t* DataManager::FormatType(int type) {
 	wchar_t* p = tpBuffer;
 	unsigned filter = 1;
 	int i = 1050;
-	for(; filter != 0x8000000; filter <<= 1, ++i) {
+	for(; filter != 0x20000000; filter <<= 1, ++i) {
 		if(type & filter) {
 			BufferIO::CopyWStrRef(GetSysString(i), p, 16);
 			*p = L'|';

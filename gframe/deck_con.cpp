@@ -414,6 +414,11 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->cbCardType2->addItem(dataManager.GetSysString(1059), TYPE_MONSTER + TYPE_SPIRIT);
 					mainGame->cbCardType2->addItem(dataManager.GetSysString(1071), TYPE_MONSTER + TYPE_FLIP);
 					mainGame->cbCardType2->addItem(dataManager.GetSysString(1072), TYPE_MONSTER + TYPE_TOON);
+					mainGame->cbCardType2->addItem(dataManager.GetSysString(1078), TYPE_MONSTER + TYPE_DARKTUNER);
+					mainGame->cbCardType2->addItem(dataManager.GetSysString(1077), TYPE_MONSTER + TYPE_DARKSYNCHRO);
+					// TODO
+					//myswprintf(normaldarktuner, L"%ls|%ls", dataManager.GetSysString(1054), dataManager.GetSysString(1078));
+					//mainGame->cbCardType2->addItem(syntuner, TYPE_MONSTER + TYPE_NORMAL + TYPE_DARKTUNER);
 					break;
 				}
 				case 2: {
@@ -964,7 +969,7 @@ bool DeckBuilder::CardNameContains(const wchar_t *haystack, const wchar_t *needl
 	return false;
 }
 bool DeckBuilder::push_main(code_pointer pointer, int seq) {
-	if(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+	if(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_DARKSYNCHRO))
 		return false;
 	auto& container = deckManager.current_deck.main;
 	int maxc = mainGame->is_siding ? 64 : 60;
@@ -979,7 +984,7 @@ bool DeckBuilder::push_main(code_pointer pointer, int seq) {
 	return true;
 }
 bool DeckBuilder::push_extra(code_pointer pointer, int seq) {
-	if(!(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)))
+	if(!(pointer->second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_DARKSYNCHRO)))
 		return false;
 	auto& container = deckManager.current_deck.extra;
 	int maxc = mainGame->is_siding ? 20 : 15;

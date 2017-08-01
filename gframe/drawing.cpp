@@ -652,7 +652,8 @@ void Game::DrawStatus(ClientCard* pcard, int x1, int y1, int x2, int y2) {
 			pcard->defense > pcard->base_defense ? 0xffffff00 : pcard->defense < pcard->base_defense ? 0xffff2090 : 0xffffffff, false, false, 0);
 		adFont->draw(pcard->lvstring, recti(x2, y2, x2 + 2, y2 + 20), 0xff000000, false, false, 0);
 		adFont->draw(pcard->lvstring, recti(x2 + 1, y2, x2 + 3, y2 + 21),
-			(pcard->type & TYPE_XYZ) ? 0xffff80ff : (pcard->type & TYPE_TUNER) ? 0xffffff00 : 0xffffffff, false, false, 0);
+			(pcard->type & TYPE_XYZ) ? 0xffff80ff : (pcard->type & TYPE_DARKTUNER) ? 0xff80ff80 : 
+			(pcard->type & TYPE_DARKSYNCHRO) ? 0xff99ccff : (pcard->type & TYPE_TUNER) ? 0xffffff00 : 0xffffffff, false, false, 0);
 	}
 }
 void Game::DrawGUI() {
@@ -1138,6 +1139,7 @@ void Game::DrawDeckBd() {
 			if(!(ptr->second.type & TYPE_LINK)) {
 				wchar_t* form = L"\u2605";
 				if(ptr->second.type & TYPE_XYZ) form = L"\u2606";
+				if(ptr->second.type & TYPE_DARKSYNCHRO) form = L"\u235f";
 				myswprintf(textBuffer, L"%ls/%ls %ls%d", dataManager.FormatAttribute(ptr->second.attribute), dataManager.FormatRace(ptr->second.race), form, ptr->second.level);
 				textFont->draw(textBuffer, recti(859, 186 + i * 66, 955, 207 + i * 66), 0xff000000, false, false);
 				textFont->draw(textBuffer, recti(860, 187 + i * 66, 955, 207 + i * 66), 0xffffffff, false, false);

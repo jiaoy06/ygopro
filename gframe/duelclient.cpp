@@ -1862,7 +1862,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 				(*cit)->location = LOCATION_GRAVE;
 			int m = 0;
 			for (auto cit = mainGame->dField.deck[player].begin(); cit != mainGame->dField.deck[player].end(); ) {
-				if ((*cit)->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
+				if ((*cit)->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_DARKSYNCHRO)) {
 					(*cit)->position = POS_FACEDOWN;
 					mainGame->dField.AddCard(*cit, player, LOCATION_EXTRA, 0);
 					cit = mainGame->dField.deck[player].erase(cit);
@@ -1882,7 +1882,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			int m = 0;
 			for (auto cit = mainGame->dField.deck[player].begin(); cit != mainGame->dField.deck[player].end(); ) {
 				ClientCard* pcard = *cit;
-				if (pcard->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
+				if (pcard->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_DARKSYNCHRO)) {
 					pcard->position = POS_FACEDOWN;
 					mainGame->dField.AddCard(pcard, player, LOCATION_EXTRA, 0);
 					cit = mainGame->dField.deck[player].erase(cit);
